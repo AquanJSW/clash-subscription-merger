@@ -1,8 +1,8 @@
 - name: SUB-A
-  url: example.com/config-a.yaml
+  url: https://example.com/config-a.yaml
   
 - name: SUB-B
-  url: example.com/config-b.yaml
+  url: https://example.com/config-b.yaml
   # Those proxies whose names contain the following patterns will be filtered out
   patterns:
   - 最新
