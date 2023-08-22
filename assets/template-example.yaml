@@ -1,0 +1,107 @@
+allow-lan: false
+external-controller: :9090
+ipv6: true
+log-level: silent
+mixed-port: 7890
+mode: rule
+
+# Manually set proxies are default not to be added in proxy-groups.
+proxies:
+- name: manual
+  type: vmess
+  server: example.com
+  port: 443
+  uuid: f554217e-6aef-4c5b-9a43-4bf38b8ebec8
+  alterId: 0
+  cipher: auto
+  udp: true
+  tls: true
+  servername: example.com
+  network: ws
+  ws-opts:
+    path: /ray
+
+proxy-groups:
+- name: AUTO
+  type: fallback
+  proxies:
+  - AUTO-SUB-A
+  - AUTO-SUB-B
+  - manual
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+
+- name: AUTO-SUB-A
+  type: url-test
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+  tolerance: 150
+  lazy: true
+  subscriptions:
+  - SUB-A
+
+- name: AUTO-SUB-B
+  type: url-test
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+  tolerance: 150
+  lazy: true
+  subscriptions:
+  - SUB-B
+
+- name: AUTO-SUB-A-HK
+  type: url-test
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+  tolerance: 150
+  lazy: true
+  subscriptions:
+  - SUB-A
+  # Only need HK proxies
+  region: +HK
+
+- name: AUTO-SUB-B-HK
+  type: url-test
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+  tolerance: 150
+  lazy: true
+  subscriptions:
+  - SUB-B
+  region: +HK
+
+- name: YOUTUBE
+  type: fallback
+  proxies:
+  - AUTO-SUB-A-HK
+  - AUTO-SUB-B-HK
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+
+- name: OPENAI
+  type: url-test
+  interval: 300
+  tolerance: 150
+  lazy: true
+  subscriptions:
+  - SUB-A
+  - SUB-B
+  # Except HK and TW proxies
+  region: -HK-TW
+  url: https://api.openai.com
+
+rules:
+- DOMAIN-SUFFIX,googlevideo.com,YOUTUBE
+- DOMAIN-SUFFIX,youtube.com,YOUTUBE
+- DOMAIN,youtube.googleapis.com,YOUTUBE
+
+- DOMAIN-SUFFIX,openai.com,OPENAI
+- DOMAIN-SUFFIX,auth0.com,OPENAI
+- DOMAIN-SUFFIX,bing.com,OPENAI
+- DOMAIN-SUFFIX,live.com,OPENAI
+
+- GEOIP,LAN,DIRECT
+- GEOIP,CN,DIRECT
+
+- DOMAIN-SUFFIX,googleapis.cn,AUTO
+- MATCH,AUTO
