@@ -1,5 +1,4 @@
 import dataclasses
-import functools
 import json
 import logging
 import re
