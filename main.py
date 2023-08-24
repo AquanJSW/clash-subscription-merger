@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import argparse
 import asyncio
+import logging
 import os
+import sys
+from unittest.mock import Mock
 
 import yaml
 
@@ -11,6 +14,9 @@ import utils.logging
 import utils.net
 from subscription.subscription import parse_subscription_config
 from template.template import Template
+from utils.telegrambot import TelegramBot
+
+logger: logging.Logger
 
 
 class Args(argparse.Namespace):
@@ -20,6 +26,9 @@ class Args(argparse.Namespace):
     verbose: bool
     proxy: str
     # cache: bool
+
+    api_key: str
+    chat_id: str
 
 
 def parse_args():
@@ -31,6 +40,10 @@ def parse_args():
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('--proxy', default=os.environ.get('HTTPS_PROXY', ''), help='used to download subscriptions')
 
+    bot_options = parser.add_argument_group('bot options')
+    bot_options.add_argument('--api-key', help='telegram bot api key')
+    bot_options.add_argument('--chat-id', help='telegram chat id')
+
     # dev_options = parser.add_argument_group('dev options')
     # dev_options.add_argument('--cache', help='using cached subscriptions instead of re-downloading to speed up test', action='store_true')
     # fmt: on
@@ -38,13 +51,7 @@ def parse_args():
     return args
 
 
-async def main():
-    args = parse_args()
-
-    logger = utils.logging.init_logger(
-        config.APP_NAME, level='DEBUG' if args.verbose else 'INFO'
-    )
-
+async def _main(args: Args):
     if args.proxy:
         os.environ['https_proxy'] = args.proxy
         os.environ['http_proxy'] = args.proxy
@@ -92,8 +99,28 @@ async def main():
         logger.info('Wrote %s', output_path)
 
 
-if __name__ == '__main__':
+def main(args: Args):
+    global logger
+
+    logger = utils.logging.init_logger(
+        config.APP_NAME, level='DEBUG' if args.verbose else 'INFO'
+    )
+    if args.api_key and args.chat_id:
+        logger.info('Telegram bot is enabled')
+        bot = TelegramBot(args.api_key, args.chat_id)
+    else:
+        logger.info('Telegram bot is disabled')
+        bot = Mock()
+
     try:
-        asyncio.run(main())
+        asyncio.run(_main(args))
+        bot.send_message('Finish merging Clash subscriptions.')
     except KeyboardInterrupt:
         pass
+    except:
+        logger.exception('Failed to merge Clash subscriptions')
+        bot.send_message(f'Failed to merge Clash subscriptions\n{sys.exc_info()}')
+
+
+if __name__ == '__main__':
+    main(parse_args())
