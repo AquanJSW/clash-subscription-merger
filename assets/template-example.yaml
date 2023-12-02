@@ -5,7 +5,7 @@ log-level: silent
 mixed-port: 7890
 mode: rule
 
-# Manually set proxies are default not to be added in proxy-groups.
+# Manually set proxies are default not to be added to proxy-groups.
 proxies:
 - name: manual
   type: vmess
@@ -37,6 +37,7 @@ proxy-groups:
   interval: 300
   tolerance: 150
   lazy: true
+  # Only include SUB-A proxies
   subscriptions:
   - SUB-A
 

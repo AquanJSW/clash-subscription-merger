@@ -1,6 +1,10 @@
 import gzip
+import io
 import logging
 import os
+import platform
+import stat
+import zipfile
 
 import requests
 
@@ -23,16 +27,26 @@ def build_simple_config(port, controller_port, proxies: list[dict]):
 
 def download_clash_bin(
     filepath,
-    url='https://github.com/Dreamacro/clash/releases/download/premium/clash-linux-amd64-2023.08.17.gz',
     timeout=10,
 ):
     """Download clash binary."""
+    # fmt: off
+    URLS = {
+        ('Windows', 'AMD64'):   'https://github.com/AquanJSW/clashpremium-core-binaries/raw/main/clashpremium-windows-amd64.exe',
+        ('Linux',   'x86_64'):  'https://github.com/AquanJSW/clashpremium-core-binaries/raw/main/clashpremium-linux-amd64',
+        ('Linux',   'aarch64'): 'https://github.com/AquanJSW/clashpremium-core-binaries/raw/main/clashpremium-linux-armv8'
+    }
+    # fmt: on
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
     logger.info('downloading clash binary')
-    raw = gzip.decompress(requests.get(url, timeout=timeout).content)
+    query = (platform.system(), platform.machine())
+    assert query in URLS, f'unsupported platform: {query}'
+    raw = requests.get(URLS[query], timeout=timeout, allow_redirects=True).content
     with open(filepath, 'wb') as fs:
         fs.write(raw)
-    os.chmod(filepath, 0o755)
+    if platform.system() != 'Windows':
+        # chmod +x
+        os.chmod(filepath, os.stat(filepath).st_mode | stat.S_IEXEC)
 
 
 def download_maxmind_db(

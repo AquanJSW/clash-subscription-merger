@@ -1,19 +1,17 @@
 [[source]]
-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+url = "https://pypi.org/simple"
 verify_ssl = true
-name = "pip_conf_index_global"
+name = "pypi"
 
 [packages]
+pyyaml = "*"
 aiohttp = "*"
 appdirs = "*"
-pyyaml = "*"
 requests = "*"
 maxminddb = "*"
 
 [dev-packages]
-ipykernel = "*"
-pandas = "*"
 
 [requires]
-python_version = "3.11"
-python_full_version = "3.11.4"
+python_version = "3.12"
+python_full_version = "3.12.0"
