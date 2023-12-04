@@ -44,9 +44,8 @@ def download_clash_bin(
     raw = requests.get(URLS[query], timeout=timeout, allow_redirects=True).content
     with open(filepath, 'wb') as fs:
         fs.write(raw)
-    if platform.system() != 'Windows':
-        # chmod +x
-        os.chmod(filepath, os.stat(filepath).st_mode | stat.S_IEXEC)
+    # chmod +x
+    os.chmod(filepath, os.stat(filepath).st_mode | stat.S_IEXEC)
 
 
 def download_maxmind_db(

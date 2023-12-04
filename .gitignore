@@ -1,8 +1,11 @@
 *.pyc
+Makefile
+test.py
+
 .vscode
 venv
+.github
+.pytest_cache
 
 assets/**
 !assets/*example*
-
-Makefile

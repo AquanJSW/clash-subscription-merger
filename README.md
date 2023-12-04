@@ -27,3 +27,15 @@ bot options:
 
 >>> python main.py -s sub.yaml -t temp.yaml -o out_dir
 ```
+
+## 安装
+
+```shell
+git clone --depth=1 https://github.com/AquanJSW/clash-subscription-merger.git
+cd clash-subscription-merger
+python3 -m pip install -U pip pipenv
+# only tested on Python 3.11 and 3.12
+python3 -m pipenv --python python3
+python3 -m pipenv install
+python3 -m pipenv run python main.py -h
+```
